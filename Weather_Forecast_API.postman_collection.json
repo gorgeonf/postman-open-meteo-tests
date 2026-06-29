@@ -406,9 +406,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}",
+              "raw": "{{base_url}}?latitude={{latitude}}&longitude={{longitude}}&daily={{daily}}&timezone={{timezone}}",
               "host": [
                 "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                },
+                {
+                  "key": "daily",
+                  "value": "{{daily}}"
+                },
+                {
+                  "key": "timezone",
+                  "value": "{{timezone}}"
+                }
               ]
             }
           },
