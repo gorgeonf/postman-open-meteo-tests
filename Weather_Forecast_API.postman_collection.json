@@ -1,0 +1,503 @@
+{
+  "info": {
+    "_postman_id": "a297d4db-edf6-4735-9e8c-2352d0b36ecd",
+    "name": "Weather Forecast API",
+    "description": "# Weather Forecast API\n\nSeamless integration of high-resolution weather models with up 16 days forecast\n\n[https://open-meteo.com/en/docs](https://open-meteo.com/en/docs)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53188595",
+    "_collection_link": "https://go.postman.co/collection/53188595-a297d4db-edf6-4735-9e8c-2352d0b36ecd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Invalid requests",
+      "item": [
+        {
+          "name": "Invalid timezone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = {};\r",
+                  "\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    try {\r",
+                  "        response = pm.response.json();\r",
+                  "    } catch (e) {\r",
+                  "        pm.expect.fail(\"Response is not valid JSON\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Status should be 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Error: invalid timezone\", function () {  \r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response).to.have.property(\"reason\");\r",
+                  "    \r",
+                  "    pm.expect(response.error).to.be.eql(true);\r",
+                  "    pm.expect(response.reason).to.be.equal(\"Invalid timezone\")\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}?latitude={{latitude}}&longitude={{longitude}}&daily={{daily}}&timezone=Sydney",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                },
+                {
+                  "key": "daily",
+                  "value": "{{daily}}"
+                },
+                {
+                  "key": "timezone",
+                  "value": "Sydney"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Latitude",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = {};\r",
+                  "\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    try {\r",
+                  "        response = pm.response.json();\r",
+                  "    } catch (e) {\r",
+                  "        pm.expect.fail(\"Response is not valid JSON\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Status should be 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Error: latitude not in range\", function () {  \r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response).to.have.property(\"reason\");\r",
+                  "    \r",
+                  "    pm.expect(response.error).to.be.eql(true);\r",
+                  "    pm.expect(response.reason).to.be.equal(\"Latitude must be in range of -90 to 90°. Given: 250.0.\")\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}?latitude=250&longitude={{longitude}}&daily={{daily}}&timezone={{timezone}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "250"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                },
+                {
+                  "key": "daily",
+                  "value": "{{daily}}"
+                },
+                {
+                  "key": "timezone",
+                  "value": "{{timezone}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Boundary Tests",
+      "item": [
+        {
+          "name": "longitude boundaries 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const testValues = [180, -180];\r",
+                  "\r",
+                  "testValues.forEach(lon => {\r",
+                  "    pm.sendRequest({\r",
+                  "        url: `https://api.open-meteo.com/v1/forecast?latitude=-33.87&longitude=${lon}`,\r",
+                  "        method: \"GET\"\r",
+                  "    }, function (err, res) {\r",
+                  "\r",
+                  "        const body = res.json();\r",
+                  "\r",
+                  "        pm.test(`Status for longitude ${lon}`, function () {\r",
+                  "            pm.expect(res.code).to.eql(200);\r",
+                  "        });\r",
+                  "\r",
+                  "        pm.test(`Longitude is valid number`, function () {\r",
+                  "            pm.expect(body.longitude).to.be.a(\"number\");\r",
+                  "            actual = body.longitude;\r",
+                  "            const isEquivalent =\r",
+                  "                actual === lon ||\r",
+                  "                (lon === 180 && actual === -180) ||\r",
+                  "                (lon === -180 && actual === 180);\r",
+                  "\r",
+                  "            pm.expect(isEquivalent).to.be.true;\r",
+                  "        });\r",
+                  "\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}",
+              "host": [
+                "{{base_url}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "longitude boundaries 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const testValues = [179, -179];\r",
+                  "\r",
+                  "testValues.forEach(lon => {\r",
+                  "    pm.sendRequest({\r",
+                  "        url: `https://api.open-meteo.com/v1/forecast?latitude=-33.87&longitude=${lon}`,\r",
+                  "        method: \"GET\"\r",
+                  "    }, function (err, res) {\r",
+                  "\r",
+                  "        const body = res.json();\r",
+                  "\r",
+                  "        pm.test(`Status for longitude ${lon}`, function () {\r",
+                  "            pm.expect(res.code).to.eql(200);\r",
+                  "        });\r",
+                  "\r",
+                  "        pm.test(`Longitude is valid number and within the tolerance`, function () {\r",
+                  "            pm.expect(body.longitude).to.be.a(\"number\");\r",
+                  "            pm.expect(body.longitude).to.be.closeTo(lon, 0.01);\r",
+                  "        });\r",
+                  "\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}",
+              "host": [
+                "{{base_url}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Happy paths",
+      "item": [
+        {
+          "name": "Smoke tests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = {};\r",
+                  "\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    try {\r",
+                  "        response = pm.response.json();\r",
+                  "    } catch (e) {\r",
+                  "        pm.expect.fail(\"Response is not valid JSON\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Status should be 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Required fields exist\", function () {\r",
+                  "    pm.expect(response).to.include.keys([\"latitude\", \"longitude\", \"timezone\", \"daily\"]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Latitude and longitude are numeric and within expected range\", function () {\r",
+                  "    pm.expect(response.latitude).to.be.a('number');\r",
+                  "    pm.expect(response.longitude).to.be.a('number');\r",
+                  "\r",
+                  "    // Open-Meteo uses a 9km grid. \r",
+                  "    // In geography, 11km equals roughly 0.1 degrees.\r",
+                  "    // Therefore, the maximum grid snapping error is half of that: 0.05.\r",
+                  "    pm.expect(response.latitude).to.be.closeTo(-33.8725, 0.05)\r",
+                  "    pm.expect(response.longitude).to.be.closeTo(151.21, 0.05)\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Timezone is present and equals Australia/Sydney\", function () {\r",
+                  "    pm.expect(response.timezone).to.be.a('string');\r",
+                  "    pm.expect(response.timezone).to.equal(\"Australia/Sydney\");\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Daily forecast contains required fields (time, min, max temperatures)\", function () {\r",
+                  "    const daily = response.daily;\r",
+                  "    pm.expect(daily).to.be.a('object');\r",
+                  "    pm.expect(daily).to.haveOwnProperty('time');\r",
+                  "    pm.expect(daily).to.haveOwnProperty('temperature_2m_max');\r",
+                  "    pm.expect(daily).to.haveOwnProperty('temperature_2m_min');\r",
+                  "})\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}?latitude={{latitude}}&longitude={{longitude}}&daily={{daily}}&timezone={{timezone}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                },
+                {
+                  "key": "daily",
+                  "value": "{{daily}}"
+                },
+                {
+                  "key": "timezone",
+                  "value": "{{timezone}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Temperature values validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = {};\r",
+                  "\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    try {\r",
+                  "        response = pm.response.json();\r",
+                  "    } catch (e) {\r",
+                  "        pm.expect.fail(\"Response is not valid JSON\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Status should be 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Required fields exist\", function () {\r",
+                  "    pm.expect(response).to.include.keys([\"daily_units\", \"daily\"]);    \r",
+                  "    pm.expect(response.daily_units).to.include.keys([\"temperature_2m_min\", \"temperature_2m_max\"]);\r",
+                  "    pm.expect(response.daily).to.include.keys([\"time\", \"temperature_2m_min\", \"temperature_2m_max\"]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Temperature values are within realistic range\", function () {\r",
+                  "    pm.expect(response.daily_units.temperature_2m_max).to.be.eql(\"°C\");\r",
+                  "    response.daily.temperature_2m_max.forEach(t => {\r",
+                  "        pm.expect(t).to.be.within(-80, 60);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Min temperature is always <= max temperature\", function () {\r",
+                  "    const d = response.daily;\r",
+                  "    for (let i = 0; i < d.time.length; i++) {\r",
+                  "        pm.expect(d.temperature_2m_min[i]).to.be.at.most(d.temperature_2m_max[i]);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}",
+              "host": [
+                "{{base_url}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Data consistency",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const baseUrl = \"https://api.open-meteo.com/v1/forecast\";\r",
+                  "\r",
+                  "const cases = [\r",
+                  "    { lat: -33.87, lon: 151.21, label: \"Sydney\" },\r",
+                  "    { lat: -27.46, lon: 153.02, label: \"Brisbane\" },\r",
+                  "    { lat: 20.77, lon: -156.26, label: \"Maui\" }\r",
+                  "];\r",
+                  "\r",
+                  "cases.forEach(c => {\r",
+                  "    pm.sendRequest({\r",
+                  "        url: `${baseUrl}?latitude=${c.lat}&longitude=${c.lon}&timezone=auto&daily=temperature_2m_max`,\r",
+                  "        method: \"GET\"\r",
+                  "    }, function (err, res) {\r",
+                  "\r",
+                  "        const body = res.json();\r",
+                  "\r",
+                  "        pm.test(`Response valid for ${c.label}`, function () {\r",
+                  "            pm.expect(res.code).to.eql(200);\r",
+                  "            pm.expect(body).to.have.property(\"latitude\");\r",
+                  "            pm.expect(body).to.have.property(\"longitude\");\r",
+                  "            pm.expect(body).to.have.property(\"timezone\");\r",
+                  "        });\r",
+                  "\r",
+                  "        pm.test(`Coordinates change correctly for ${c.label}`, function () {\r",
+                  "            pm.expect(body.latitude).to.be.closeTo(c.lat, 0.1);\r",
+                  "            pm.expect(body.longitude).to.be.closeTo(c.lon, 0.1);\r",
+                  "        });\r",
+                  "\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}",
+              "host": [
+                "{{base_url}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
