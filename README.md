@@ -22,3 +22,11 @@ https://open-meteo.com/en/docs
 ## Tools
 - Postman
 - Newman (optional for CLI execution)
+
+## How to run (optional automation mode):
+
+Install Newman:
+npm install -g newman
+
+Run collection:
+newman run Weather_Forecast_API.postman_collection.json -e Sydney-Australia.postman_environment.json
